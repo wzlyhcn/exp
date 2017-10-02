@@ -1,7 +1,7 @@
 cpp=g++
 
-target_name=libexp
-target_inc_path=./inc/
+target_name=exptest
+target_inc_path=../inc/
 target_out_path=./out/
 target_obj_path=./out/obj/
 target_dep_path=./out/dep/
@@ -17,17 +17,15 @@ target_dep_files=$(patsubst %.cpp,$(target_dep_path)%.d,$(target_src_files))
 all : $(target_name)
 	
 $(target_name) : $(target_obj_files)
-	ar -cr $(target_lib_path)$(target_name).a $(target_obj_files)
+	$(cpp) $(cpp_flags) -o $@ $(target_obj_files)
 
 $(target_dep_path)%.d : %.cpp
-	mkdir -p $(target_dep_path)
 	@set -e; \
 	rm -f $@; \
 	$(cpp) -MM $(cpp_flags) $< > $@; \
 	sed -i 's,\(.*\)\.o *:,\1.o $@:,g' $@
 
 $(target_obj_path)%.o : %.cpp
-	mkdir -p $(target_obj_path)
 	$(cpp) $(cpp_flags) -c -o "$@" "$<"
 
 clean :

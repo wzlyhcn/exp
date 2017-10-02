@@ -41,13 +41,15 @@ public:
 
 	void remove(void(*function)(Args...))
 	{
-		remove(FunctionCallable<decltype(function)>(function));
+		FunctionCallable<decltype(function)> callable(function);
+		remove(callable);
 	}
 
 	template <typename Object>
 	void remove(Object* object, void (Object::*memberFunction)(Args...))
 	{
-		remove(MemberFunctionCallable<Object, decltype(memberFunction)>(object, memberFunction));
+		MemberFunctionCallable<Object, decltype(memberFunction)> callable(object, memberFunction);
+		remove(callable);
 	}
 
 	void clear()
@@ -67,13 +69,15 @@ public:
 
 	bool exists(void(*function)(Args...)) const
 	{
-		return exists(FunctionCallable<decltype(function)>(function));
+		FunctionCallable<decltype(function)> callable(function);
+		return exists(callable);
 	}
 
 	template <typename Object>
 	bool exists(Object* object, void (Object::*memberFunction)(Args...)) const
 	{
-		exists(MemberFunctionCallable<Object, decltype(memberFunction)>(object, memberFunction));
+		MemberFunctionCallable<Object, decltype(memberFunction)> callable(object, memberFunction);
+		return exists(callable);
 	}
 private:
 	class Callable {
