@@ -7,6 +7,7 @@ class Delegate {
 public:
 	Delegate()
 	{
+		m_current = m_callables.end();
 	}
 
 	~Delegate()
@@ -15,15 +16,13 @@ public:
 	}
 
 	void operator()(Args... args)
-	{
-		for (auto i = m_callables.begin(); i != m_callables.end();) {
-			auto callable = *i;
-			if (callable) {
-				(*callable)(std::forward<Args>(args)...);
-				++i;
-			}
-			else {
-				i = m_callables.erase(i);
+	{ 
+		for (m_current = m_callables.begin(); m_current != m_callables.end();) {
+			auto callable = *m_current;
+			auto current = m_current;
+			(*callable)(std::forward<Args>(args)...);
+			if (current == m_current) {
+				++m_current;
 			}
 		}
 	}
@@ -145,9 +144,14 @@ private:
 	{
 		for (auto i = m_callables.begin(); i != m_callables.end(); ++i) {
 			auto& callable = *i;
-			if (callable && *callable == otherCallable) {
+			if (*callable == otherCallable) {
 				delete callable;
-				callable = nullptr;
+				if (i == m_current) {
+					m_current = m_callables.erase(i);
+				}
+				else {
+					m_callables.erase(i);
+				}
 				break;
 			}
 		}
@@ -157,7 +161,7 @@ private:
 	{
 		for (auto i = m_callables.begin(); i != m_callables.end(); ++i) {
 			auto& callable = *i;
-			if (callable && *callable == otherCallable) {
+			if (*callable == otherCallable) {
 				return true;
 			}
 		}
@@ -165,5 +169,6 @@ private:
 	}
 private:
 	Callables m_callables;
+	typename Callables::iterator m_current;
 };
 

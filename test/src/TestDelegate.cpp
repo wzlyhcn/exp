@@ -19,6 +19,7 @@ public:
 	void memfn1(int a, float& b)
 	{
 		b += 1.3f;
+		d.remove(this, &MyObj::memfn1);
 	}
 };
 
@@ -42,7 +43,7 @@ int main()
 		d.remove(&myobj, &MyObj::memfn1);
 	}
 
-	std::printf("a = %d, b = %f\n", a, b);
+	std::printf("a = %d, b = %f, d.getCount() = %d", a, b, d.getCount());
     return 0;
 }
 
