@@ -5,7 +5,8 @@
 template <typename... Args>
 class Delegate {
 public:
-	Delegate()
+	Delegate():
+		m_currentChanged(false)
 	{
 		m_current = m_callables.end();
 	}
@@ -16,12 +17,12 @@ public:
 	}
 
 	void operator()(Args... args)
-	{ 
+	{
 		for (m_current = m_callables.begin(); m_current != m_callables.end();) {
 			auto callable = *m_current;
-			auto current = m_current;
+			m_currentChanged = false;
 			(*callable)(std::forward<Args>(args)...);
-			if (current == m_current) {
+			if (!m_currentChanged) {
 				++m_current;
 			}
 		}
@@ -31,7 +32,7 @@ public:
 	{
 		m_callables.emplace_back(new FunctionCallable<decltype(function)>(function));
 	}
-	
+
 	template <typename Object>
 	void add(Object* object, void (Object::*memberFunction)(Args...))
 	{
@@ -66,6 +67,11 @@ public:
 		return m_callables.size();
 	}
 
+	bool isEmpty() const
+	{
+		return m_callables.empty();
+	}
+
 	bool exists(void(*function)(Args...)) const
 	{
 		FunctionCallable<decltype(function)> callable(function);
@@ -89,7 +95,7 @@ private:
 	template <typename Function>
 	class FunctionCallable : public Callable {
 	public:
-		FunctionCallable(Function function):
+		FunctionCallable(Function function) :
 			m_function(function)
 		{
 		}
@@ -148,6 +154,7 @@ private:
 				delete callable;
 				if (i == m_current) {
 					m_current = m_callables.erase(i);
+					m_currentChanged = true;
 				}
 				else {
 					m_callables.erase(i);
@@ -170,5 +177,6 @@ private:
 private:
 	Callables m_callables;
 	typename Callables::iterator m_current;
+	bool m_currentChanged;
 };
 
