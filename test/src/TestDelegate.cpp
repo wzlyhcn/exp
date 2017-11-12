@@ -9,41 +9,64 @@
 
 Delegate<int, float&> d;
 
-void fun1(int a, float& b)
-{
-	b += 1.0f;
-}
-
-class MyObj {
+class MyObj : public Delegatable {
 public:
+	MyObj(int id) :
+		m_id(id)
+	{
+	}
+
 	void memfn1(int a, float& b)
 	{
+		std::printf("MyObj::memfn1() - id = %d\n", m_id);
 		b += 1.3f;
-		d.remove(this, &MyObj::memfn1);
 	}
+
+	void memfn2(int a, float& b)
+	{
+		std::printf("MyObj::memfn2() - id = %d\n", m_id);
+		b -= 1.3f;
+	}
+private:
+	int m_id;
 };
 
-MyObj myobj;
+MyObj myobj1(1), myobj2(2);
 
 int main()
 {
-	for (int i = 0; i < 1000; ++i) {
-		d.add(&fun1);
-		d.add(&myobj, &MyObj::memfn1);
-	}
+	d.bind(&myobj1, &MyObj::memfn1);
+	d.bind(&myobj1, &MyObj::memfn2);
+
+	assert(d.exists(&myobj1, &MyObj::memfn1) == true);
+	assert(d.exists(&myobj1, &MyObj::memfn2) == true);
+
+	d.bind(&myobj2, &MyObj::memfn1);
+	d.bind(&myobj2, &MyObj::memfn2);
+
+	assert(d.exists(&myobj2, &MyObj::memfn1) == true);
+	assert(d.exists(&myobj2, &MyObj::memfn2) == true);
 
 	int a = 1;
 	float b = 0.1f;
-	for (int i = 0; i < 1000; ++i) {
+	for (int i = 0; i < 10; ++i) {
 		d(a, b);
 	}
 
-	for (int i = 0; i < 1000; ++i) {
-		d.remove(&fun1);
-		d.remove(&myobj, &MyObj::memfn1);
-	}
+	myobj1.unbindAll();
 
-	std::printf("a = %d, b = %f, d.getCount() = %d", a, b, d.getCount());
-    return 0;
+	assert(d.exists(&myobj1, &MyObj::memfn1) == false);
+	assert(d.exists(&myobj1, &MyObj::memfn2) == false);
+
+	myobj2.unbindAll();
+
+	assert(d.exists(&myobj2, &MyObj::memfn1) == false);
+	assert(d.exists(&myobj2, &MyObj::memfn2) == false);
+
+	std::printf("a = %d, b = %f\n", a, b);
+#if _WIN32
+	std::system("pause");
+#endif
+	return 0;
 }
 
