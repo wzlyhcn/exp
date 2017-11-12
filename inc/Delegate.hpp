@@ -78,6 +78,7 @@ public:
 	Delegate():
 		m_currentChanged(false)
 	{
+		m_current = m_closures.end();
 	}
 
 	~Delegate()
