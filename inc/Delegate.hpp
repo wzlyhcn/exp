@@ -160,7 +160,7 @@ protected:
 	{
 		Closure* _closure = dynamic_cast<Closure*>(closure);
 		auto i = m_closures.find(_closure);
-		if (i == m_current) {
+		if (m_currentChanged || i == m_current) {
 			m_current = m_closures.erase(i);
 			m_currentChanged = true;
 		}
