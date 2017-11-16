@@ -119,7 +119,7 @@ public:
 			Closure* _closure = *i;
 			_closure->getDelegatable()->unbind(this, _closure);
 			delete _closure;
-			if (i == m_current) {
+			if (m_currentChanged || i == m_current) {
 				m_current = m_closures.erase(i);
 				m_currentChanged = true;
 			}
